@@ -24,37 +24,6 @@ function Progress({ scene, onBack, onForward, muted, setMuted }: { scene: Scene;
   </header>
 }
 
-function PinGate({ onUnlock }: { onUnlock: () => void }) {
-  const [pin, setPin] = useState('')
-  const [error, setError] = useState(false)
-  const [sparkle, setSparkle] = useState(false)
-  const submit = () => {
-    if (pin === birthdayConfig.pin) {
-      setSparkle(true)
-      setTimeout(onUnlock, 700)
-    } else {
-      setError(true)
-      setPin('')
-      setTimeout(() => setError(false), 900)
-    }
-  }
-  return <main className="pin-gate">
-    <FloatingHearts dark />
-    <div className="pin-orbit orbit-one" /><div className="pin-orbit orbit-two" />
-    <div className={`pin-card ${error ? 'pin-shake' : ''} ${sparkle ? 'pin-success' : ''}`}>
-      <div className="pin-lock"><Heart fill="currentColor" size={38} /></div>
-      <p className="eyebrow light">a birthday surprise, just for you</p>
-      <h1>Come a little<br /><em>closer, love.</em></h1>
-      <p className="pin-intro">This tiny world is protected by a secret only we know.</p>
-      <label htmlFor="birthday-pin">Enter our secret PIN</label>
-      <input id="birthday-pin" className="pin-input" inputMode="numeric" maxLength={4} autoComplete="off" value={pin} onChange={e => { setPin(e.target.value.replace(/\\D/g, '')); setError(false) }} onKeyDown={e => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && e.keyCode !== 229) submit() }} placeholder="♥ ♥ ♥ ♥" aria-describedby="pin-help" />
-      <button className="pin-button" onClick={submit}>Unlock my heart <Heart size={16} fill="currentColor" /></button>
-      <p id="pin-help" className={`pin-hint ${error ? 'pin-error' : ''}`}>{error ? 'That little secret didn\'t work — try again.' : 'Hint: it\'s a date that means everything.'}</p>
-      <div className="pin-footer"><span>made with love</span><span><Heart size={12} fill="currentColor" /> for you</span></div>
-    </div>
-  </main>
-}
-
 function Intro({ next }: { next: () => void }) {
   return <section className="scene intro-scene" onClick={next}><FloatingHearts dark /><div className="stars" aria-hidden="true" /> <div className="intro-copy"><p className="eyebrow light">a tiny birthday story</p><h1>First things<br /><em>first.</em></h1><div className="cake" aria-label="Birthday cake"><div className="candle"><span /></div><div className="frosting">♥</div><div className="cake-base" /></div><p className="intro-message">Happy Birthday, Supriya <span>♥</span></p><p className="intro-subtitle">Today, the world celebrates someone who makes life brighter.</p><button className="begin-hint" onClick={next}>Tap anywhere to begin <Sparkles size={14} /></button></div></section>
 }
@@ -128,26 +97,45 @@ function LoveGame({ next }: { next: () => void }) {
   const catchHeart = (gold: boolean) => { setScore(s => s + (gold ? 25 : 10)); setCaught(c => c + 1) }
   if (stage === 'catch') return <section className="scene game-scene"><div className="game-panel"><p className="eyebrow">love game 01 / 03</p><h2>Catch my <em>Heart.</em></h2><p className="game-intro">Tap the falling hearts before they float away. Golden hearts are worth extra.</p><div className="score-row"><span>score <strong>{score}</strong> / 100</span><span>{time}s</span></div><div className="game-progress"><span style={{ width: `${Math.min(score, 100)}%` }} /></div><div className="catch-field">{started ? gameHearts.map((heart, i) => <button key={`${i}-${caught}`} className={`falling-heart ${heart.gold ? 'gold' : ''}`} style={{ left: heart.left, top: heart.top, animationDelay: heart.delay }} onClick={() => catchHeart(heart.gold)} aria-label={heart.gold ? 'Catch golden heart' : 'Catch heart'}><Heart fill="currentColor" size={26} /></button>) : <div className="game-start"><Heart fill="currentColor" size={32} /><p>{score ? score >= 100 ? 'You caught all my love.' : 'So close! Give it another try.' : 'Ready, birthday love?'}</p><button className="primary-button" onClick={() => { setStarted(true); setTime(20); setScore(0) }}>{score ? 'Try again, birthday girl' : 'Start catching hearts'}</button></div>}<div className="basket"><Heart fill="currentColor" size={30} /></div></div></div></section>
   if (stage === 'quiz') { const question = birthdayConfig.quiz[quizIndex]; return <section className="scene quiz-scene"><div className="game-panel quiz-panel"><p className="eyebrow">love game 02 / 03</p><h2>How well do you know <em>us?</em></h2><div className="quiz-count">Question {quizIndex + 1} of {birthdayConfig.quiz.length}</div><div className="quiz-card"><h3>{question.question}</h3><div className="answers">{question.answers.map((answer, i) => <button key={answer} className="answer-button" onClick={() => { setFeedback(i === question.correct ? 'That’s right — you know the good stuff. ♥' : 'A sweet answer. I’ll allow it. ♥'); setTimeout(() => { setFeedback(''); if (quizIndex + 1 === birthdayConfig.quiz.length) { setStage('meter') } else { setQuizIndex(v => v + 1); setAnswers(answers + 1) } }, 700) }}>{answer}</button>)}</div>{feedback && <p className="feedback">{feedback}</p>}</div></div></section> }
-  if (stage === 'meter') return <section className="scene meter-scene"><div className="game-panel meter-panel"><p className="eyebrow">love game 03 / 05</p><h2>Send a little <em>love.</em></h2><p className="game-intro">Choose the heart that feels most like you today. There are no wrong answers.</p><div className="love-meter" aria-label="Choose your love mood">{['Tender', 'Playful', 'Dreamy', 'Forever'].map((mood, i) => <button key={mood} className="mood-button" onClick={() => setStage('match')}><Heart fill="currentColor" size={30} /><span>{mood}</span><small>{['soft and sweet', 'full of sparkle', 'lost in a daydream', 'always and ever'][i]}</small></button>)}</div></div></section>
+  if (stage === 'meter') return <section className="scene meter-scene"><div className="game-panel meter-panel"><p className="eyebrow">love game 03 / 05</p><h2>Send a little <em>Joy.</em></h2><p className="game-intro">Choose the heart that feels most like you today. There are no wrong answers.</p><div className="love-meter" aria-label="Choose your love mood">{['Tender', 'Playful', 'Dreamy', 'Forever'].map((mood, i) => <button key={mood} className="mood-button" onClick={() => setStage('match')}><Heart fill="currentColor" size={30} /><span>{mood}</span><small>{['soft and sweet', 'full of sparkle', 'lost in a daydream', 'always and ever'][i]}</small></button>)}</div></div></section>
   if (stage === 'match') return <HeartMatch onComplete={() => setStage('gift')} />
   return <section className="scene gift-scene"><div className="gift-card"><p className="eyebrow">love game 04 / 04</p><h2>You did it, <em>love.</em></h2><p>You found every little piece of this surprise.</p><button className="gift-box" onClick={next} aria-label="Open your surprise"><Gift size={72} /><span>tap to open</span></button><button className="primary-button" onClick={next}>Open your surprise <Heart size={16} fill="currentColor" /></button></div></section>
 }
 
 function Gallery({ next }: { next: () => void }) {
   const [selected, setSelected] = useState<number | null>(null)
-  return <section className="scene gallery-scene"><div className="gallery-header"><div><p className="eyebrow">little pieces of forever</p><h2>Our little <em>moments.</em></h2></div><p className="gallery-note">Replace the cards with your own memories in <code>birthday-config.ts</code>.</p></div><div className="polaroids">{birthdayConfig.photos.map((photo, i) => <button className={`polaroid tilt-${i}`} key={i} onClick={() => setSelected(i)}>{photo.src ? <img src={photo.src} alt={photo.caption} /> : <div className="photo-placeholder"><Heart size={30} fill="currentColor" /><span>your photo here</span></div>}<span>{photo.caption}</span></button>)}</div><button className="bottom-continue dark-link" onClick={next}>One last thing <ArrowRight size={15} /></button>{selected !== null && <div className="lightbox" role="dialog" aria-modal="true"><button className="lightbox-close" onClick={() => setSelected(null)} aria-label="Close photo"><X /></button>{birthdayConfig.photos[selected].src ? <img src={birthdayConfig.photos[selected].src} alt={birthdayConfig.photos[selected].caption} /> : <div className="lightbox-placeholder"><Heart size={52} fill="currentColor" /><p>Add a photo in the config file</p></div>}<p>{birthdayConfig.photos[selected].caption}</p></div>}</section>
+  const [unlocked, setUnlocked] = useState(false)
+  const [password, setPassword] = useState('')
+  const [passwordError, setPasswordError] = useState(false)
+  const submitPassword = () => {
+    if (password === birthdayConfig.letterPassword) {
+      setUnlocked(true)
+      setPassword('')
+      return
+    }
+    setPasswordError(true)
+    setPassword('')
+  }
+  return <section className="scene gallery-scene"><div className="gallery-header"><div><p className="eyebrow">little pieces of forever</p><h2>Our little <em>moments.</em></h2></div><p className="gallery-note">Eleven memories, saved just for us.</p></div><div className="polaroids">{birthdayConfig.photos.map((photo, i) => <button className={`polaroid tilt-${i}`} key={i} onClick={() => setSelected(i)}>{photo.src ? <img src={photo.src} alt={photo.caption} /> : <div className="photo-placeholder"><Heart size={30} fill="currentColor" /><span>your photo here</span></div>}<span>{photo.caption}</span></button>)}</div><button className="bottom-continue dark-link" onClick={next}>One last thing <ArrowRight size={15} /></button>{selected !== null && <div className="lightbox" role="dialog" aria-modal="true"><button className="lightbox-close" onClick={() => setSelected(null)} aria-label="Close photo"><X /></button>{birthdayConfig.photos[selected].src ? <img src={birthdayConfig.photos[selected].src} alt={birthdayConfig.photos[selected].caption} /> : <div className="lightbox-placeholder"><Heart size={52} fill="currentColor" /><p>Add a photo in the config file</p></div>}<p>{birthdayConfig.photos[selected].caption}</p></div>}{!unlocked && <div className="password-overlay" role="dialog" aria-modal="true" aria-labelledby="moments-password-title"><form className={`password-card ${passwordError ? 'password-shake' : ''}`} onSubmit={e => { e.preventDefault(); submitPassword() }}><div className="password-icon"><Heart fill="currentColor" size={28} /></div><p className="eyebrow">a secret for you</p><h3 id="moments-password-title">Our little moments</h3><p>Enter our secret to open these memories.</p><label htmlFor="moments-password">Password</label><input id="moments-password" type="password" autoFocus autoComplete="off" value={password} onChange={e => { setPassword(e.target.value); setPasswordError(false) }} placeholder="Enter the password" aria-invalid={passwordError} aria-describedby="moments-password-help" /><button className="primary-button password-submit" type="submit">Unlock our memories <Heart size={15} fill="currentColor" /></button><p id="moments-password-help" className={`password-hint ${passwordError ? 'password-error' : ''}`}>{passwordError ? 'That password is not quite right. Try again.' : 'A little secret, just between us.'}</p></form></div>}</section>
 }
 
 function FinalScene({ restart }: { restart: () => void }) {
   const [hug, setHug] = useState(false); const [playing, setPlaying] = useState(false); const [wish, setWish] = useState(''); const [released, setReleased] = useState(false); const audioRef = useRef<HTMLAudioElement>(null)
-  return <section className="scene final-scene"><FloatingHearts dark /><div className="final-glow" /><div className="final-content"><p className="eyebrow light">and now, the best part</p><h1>Happy Birthday,<br /><em>Supriya.</em> <span>♥</span></h1><p>You are one of my favorite parts of this life. I hope today reminds you just how loved and appreciated you are.</p><p>Thank you for being you. Today is your day, and I hope it&apos;s as beautiful as your heart.</p><p className="signature">Always yours, {birthdayConfig.signature || 'with all my love'} <Heart size={15} fill="currentColor" /></p><div className="final-actions"><button onClick={() => setHug(true)}><Heart size={16} /> One more hug</button><button onClick={() => setPlaying(!playing)}>{playing ? <Pause size={16} /> : <Music2 size={16} />} {playing ? 'Pause our song' : 'Play our song'}</button><button onClick={() => setReleased(false)}><Sparkles size={16} /> Make a wish</button></div>{birthdayConfig.songUrl && <div className="music-player"><Music2 size={18} /><div><strong>Our birthday song</strong><span>Press play and think of us</span></div><audio ref={audioRef} controls src={birthdayConfig.songUrl} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} /></div>}{playing && <div className="music-note">Our song is playing just for you.</div>}<div className="wish-box"><label htmlFor="wish">Write a wish and send it into the sky</label><div><input id="wish" value={wish} onChange={e => setWish(e.target.value)} placeholder="Something beautiful..." /><button onClick={() => setReleased(true)} aria-label="Release wish"><Sparkles size={16} /></button></div>{released && <p className="released">Your wish is glowing somewhere up there. ✦</p>}</div><button className="restart-button" onClick={restart}><RotateCcw size={14} /> Relive our little story</button></div>{hug && <button className="hug-overlay" onClick={() => setHug(false)} aria-label="Close hug message"><div className="hug-hearts">{Array.from({ length: 12 }, (_, i) => <Heart key={i} fill="currentColor" style={{ transform: `rotate(${i * 30}deg) translateY(-${100 + (i % 3) * 35}px)` }} />)}</div><h2>Sending you<br /><em>the biggest hug.</em></h2><p>Tap anywhere to come back.</p></button>}</section>
+  const toggleSong = () => {
+    const audio = audioRef.current
+    if (!audio) return
+    if (audio.paused) {
+      void audio.play()
+    } else {
+      audio.pause()
+    }
+  }
+  return <section className="scene final-scene"><FloatingHearts dark /><div className="final-glow" /><div className="final-content"><p className="eyebrow light">and now, the best part</p><h1>Happy Birthday,<br /><em>Supriya.</em> <span>♥</span></h1><p>You are one of my favorite parts of this life. I hope today reminds you just how loved and appreciated you are.</p><p>Thank you for being you. Today is your day, and I hope it&apos;s as beautiful as your heart.</p><p className="signature">Always yours, {birthdayConfig.signature || 'with all my love'} <Heart size={15} fill="currentColor" /></p><div className="final-actions"><button onClick={() => setHug(true)}><Heart size={16} /> One more hug</button><button onClick={toggleSong}>{playing ? <Pause size={16} /> : <Music2 size={16} />} {playing ? 'Pause our song' : 'Play our song'}</button><button onClick={() => setReleased(false)}><Sparkles size={16} /> Make a wish</button></div><div className="music-player"><Music2 size={18} /><div><strong>Our birthday songs</strong><span>Choose a song and think of us</span></div><div className="music-tracks">{birthdayConfig.songs.map((song, index) => <label key={song.src}><span>{song.title}</span><audio ref={index === 0 ? audioRef : undefined} controls src={song.src} onPlay={() => setPlaying(index === 0)} onPause={() => { if (index === 0) setPlaying(false) }} /></label>)}</div></div>{playing && <div className="music-note">Our song is playing just for you.</div>}<div className="wish-box"><label htmlFor="wish">Write a wish and send it into the sky</label><div><input id="wish" value={wish} onChange={e => setWish(e.target.value)} placeholder="Something beautiful..." /><button onClick={() => setReleased(true)} aria-label="Release wish"><Sparkles size={16} /></button></div>{released && <p className="released">Your wish is glowing somewhere up there. ✦</p>}</div><button className="restart-button" onClick={restart}><RotateCcw size={14} /> Relive our little story</button></div>{hug && <button className="hug-overlay" onClick={() => setHug(false)} aria-label="Close hug message"><div className="hug-hearts">{Array.from({ length: 12 }, (_, i) => <Heart key={i} fill="currentColor" style={{ transform: `rotate(${i * 30}deg) translateY(-${100 + (i % 3) * 35}px)` }} />)}</div><h2>Sending you<br /><em>the biggest hug.</em></h2><p>Tap anywhere to come back.</p></button>}</section>
 }
 
 export default function Page() {
-  const [unlocked, setUnlocked] = useState(false)
   const [scene, setScene] = useState<Scene>('intro'); const [muted, setMuted] = useState(false); const index = scenes.indexOf(scene)
   const next = () => setScene(scenes[Math.min(index + 1, scenes.length - 1)])
   const back = () => setScene(scenes[Math.max(index - 1, 0)])
-  if (!unlocked) return <PinGate onUnlock={() => setUnlocked(true)} />
   return <main className="birthday-app"><Progress scene={scene} onBack={back} onForward={next} muted={muted} setMuted={setMuted} />{scene === 'intro' && <Intro next={next} />}{scene === 'heart' && <HeartScene next={next} />}{scene === 'tree' && <TreeScene next={next} />}{scene === 'letter' && <LetterScene next={next} />}{scene === 'game' && <LoveGame next={next} />}{scene === 'gallery' && <Gallery next={next} />}{scene === 'final' && <FinalScene restart={() => setScene('intro')} />}<footer className="scene-label">{labels[index]} <span>·</span> {String(index + 1).padStart(2, '0')}</footer></main>
 }
