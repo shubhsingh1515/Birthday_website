@@ -25,7 +25,7 @@ function Progress({ scene, onBack, onForward, muted, setMuted }: { scene: Scene;
 }
 
 function Intro({ next }: { next: () => void }) {
-  return <section className="scene intro-scene" onClick={next}><FloatingHearts dark /><div className="stars" aria-hidden="true" /> <div className="intro-copy"><p className="eyebrow light">a tiny birthday story</p><h1>First things<br /><em>first.</em></h1><div className="cake" aria-label="Birthday cake"><div className="candle"><span /></div><div className="frosting">♥</div><div className="cake-base" /></div><p className="intro-message">Happy Birthday, Supriya <span>♥</span></p><p className="intro-subtitle">Today, the world celebrates someone who makes life brighter.</p><button className="begin-hint" onClick={next}>Tap anywhere to begin <Sparkles size={14} /></button></div></section>
+  return <section className="scene intro-scene" onClick={next}><FloatingHearts dark /><div className="stars" aria-hidden="true" /> <div className="intro-copy"><p className="eyebrow light">a tiny birthday story</p><h1>First things<br /><em>first.</em></h1><div className="cake" aria-label="Birthday cake"><div className="candle"><span /></div><div className="frosting">♥</div><div className="cake-base" /></div><p className="intro-message">Happy Birthday, Supriya <span>♥</span></p><p className="intro-subtitle">Today, the world celebrates someone who makes life brighter.</p><button className="begin-hint" onClick={e => { e.stopPropagation(); next() }}>Tap anywhere to begin <Sparkles size={14} /></button></div></section>
 }
 
 function HeartScene({ next }: { next: () => void }) {
@@ -119,23 +119,42 @@ function Gallery({ next }: { next: () => void }) {
   return <section className="scene gallery-scene"><div className="gallery-header"><div><p className="eyebrow">little pieces of forever</p><h2>Our little <em>moments.</em></h2></div><p className="gallery-note">Eleven memories, saved just for us.</p></div><div className="polaroids">{birthdayConfig.photos.map((photo, i) => <button className={`polaroid tilt-${i}`} key={i} onClick={() => setSelected(i)}>{photo.src ? <img src={photo.src} alt={photo.caption} /> : <div className="photo-placeholder"><Heart size={30} fill="currentColor" /><span>your photo here</span></div>}<span>{photo.caption}</span></button>)}</div><button className="bottom-continue dark-link" onClick={next}>One last thing <ArrowRight size={15} /></button>{selected !== null && <div className="lightbox" role="dialog" aria-modal="true"><button className="lightbox-close" onClick={() => setSelected(null)} aria-label="Close photo"><X /></button>{birthdayConfig.photos[selected].src ? <img src={birthdayConfig.photos[selected].src} alt={birthdayConfig.photos[selected].caption} /> : <div className="lightbox-placeholder"><Heart size={52} fill="currentColor" /><p>Add a photo in the config file</p></div>}<p>{birthdayConfig.photos[selected].caption}</p></div>}{!unlocked && <div className="password-overlay" role="dialog" aria-modal="true" aria-labelledby="moments-password-title"><form className={`password-card ${passwordError ? 'password-shake' : ''}`} onSubmit={e => { e.preventDefault(); submitPassword() }}><div className="password-icon"><Heart fill="currentColor" size={28} /></div><p className="eyebrow">a secret for you</p><h3 id="moments-password-title">Our little moments</h3><p>Enter our secret to open these memories.</p><label htmlFor="moments-password">Password</label><input id="moments-password" type="password" autoFocus autoComplete="off" value={password} onChange={e => { setPassword(e.target.value); setPasswordError(false) }} placeholder="Enter the password" aria-invalid={passwordError} aria-describedby="moments-password-help" /><button className="primary-button password-submit" type="submit">Unlock our memories <Heart size={15} fill="currentColor" /></button><p id="moments-password-help" className={`password-hint ${passwordError ? 'password-error' : ''}`}>{passwordError ? 'That password is not quite right. Try again.' : 'A little secret, just between us.'}</p></form></div>}</section>
 }
 
-function FinalScene({ restart }: { restart: () => void }) {
-  const [hug, setHug] = useState(false); const [playing, setPlaying] = useState(false); const [wish, setWish] = useState(''); const [released, setReleased] = useState(false); const audioRef = useRef<HTMLAudioElement>(null)
+function FinalScene({ restart, audioRef, playing, toggleSong }: { restart: () => void; audioRef: { current: HTMLAudioElement | null }; playing: boolean; toggleSong: () => void }) {
+  const [hug, setHug] = useState(false); const [wish, setWish] = useState(''); const [released, setReleased] = useState(false)
+  return <section className="scene final-scene"><FloatingHearts dark /><div className="final-glow" /><div className="final-content"><p className="eyebrow light">and now, the best part</p><h1>Happy Birthday,<br /><em>Supriya.</em> <span>♥</span></h1><p>You are one of my favorite parts of this life. I hope today reminds you just how loved and appreciated you are.</p><p>Thank you for being you. Today is your day, and I hope it&apos;s as beautiful as your heart.</p><p className="signature">Always yours, {birthdayConfig.signature || 'with all my love'} <Heart size={15} fill="currentColor" /></p><div className="final-actions"><button onClick={() => setHug(true)}><Heart size={16} /> One more hug</button><button onClick={toggleSong}>{playing ? <Pause size={16} /> : <Music2 size={16} />} {playing ? 'Pause our song' : 'Play our song'}</button><button onClick={() => setReleased(false)}><Sparkles size={16} /> Make a wish</button></div><div className="music-player"><Music2 size={18} /><div><strong>Our birthday songs</strong><span>Choose a song and think of us</span></div><div className="music-tracks"><label><span>{birthdayConfig.songs[0].title}</span><button className="track-button" onClick={toggleSong}>{playing ? 'Pause' : 'Play'}</button></label><label><span>{birthdayConfig.songs[1].title}</span><audio controls src={birthdayConfig.songs[1].src} /></label></div></div>{playing && <div className="music-note">Our song is playing just for you.</div>}<div className="wish-box"><label htmlFor="wish">Write a wish and send it into the sky</label><div><input id="wish" value={wish} onChange={e => setWish(e.target.value)} placeholder="Something beautiful..." /><button onClick={() => setReleased(true)} aria-label="Release wish"><Sparkles size={16} /></button></div>{released && <p className="released">Your wish is glowing somewhere up there. ✦</p>}</div><button className="restart-button" onClick={restart}><RotateCcw size={14} /> Relive our little story</button></div>{hug && <button className="hug-overlay" onClick={() => setHug(false)} aria-label="Close hug message"><div className="hug-hearts">{Array.from({ length: 12 }, (_, i) => <Heart key={i} fill="currentColor" style={{ transform: `rotate(${i * 30}deg) translateY(-${100 + (i % 3) * 35}px)` }} />)}</div><h2>Sending you<br /><em>the biggest hug.</em></h2><p>Tap anywhere to come back.</p></button>}</section>
+}
+
+export default function Page() {
+  const [scene, setScene] = useState<Scene>('intro'); const [muted, setMuted] = useState(false); const [playing, setPlaying] = useState(false); const audioRef = useRef<HTMLAudioElement>(null); const index = scenes.indexOf(scene)
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    audio.volume = 0.7
+    const startSong = () => {
+      void audio.play().then(() => setPlaying(true)).catch(() => undefined)
+    }
+    startSong()
+    window.addEventListener('pointerdown', startSong, { once: true })
+    window.addEventListener('keydown', startSong, { once: true })
+    return () => {
+      window.removeEventListener('pointerdown', startSong)
+      window.removeEventListener('keydown', startSong)
+    }
+  }, [])
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.muted = muted
+  }, [muted])
+  const next = () => setScene(scenes[Math.min(index + 1, scenes.length - 1)])
+  const back = () => setScene(scenes[Math.max(index - 1, 0)])
   const toggleSong = () => {
     const audio = audioRef.current
     if (!audio) return
     if (audio.paused) {
-      void audio.play()
+      void audio.play().then(() => setPlaying(true)).catch(() => undefined)
     } else {
       audio.pause()
+      setPlaying(false)
     }
   }
-  return <section className="scene final-scene"><FloatingHearts dark /><div className="final-glow" /><div className="final-content"><p className="eyebrow light">and now, the best part</p><h1>Happy Birthday,<br /><em>Supriya.</em> <span>♥</span></h1><p>You are one of my favorite parts of this life. I hope today reminds you just how loved and appreciated you are.</p><p>Thank you for being you. Today is your day, and I hope it&apos;s as beautiful as your heart.</p><p className="signature">Always yours, {birthdayConfig.signature || 'with all my love'} <Heart size={15} fill="currentColor" /></p><div className="final-actions"><button onClick={() => setHug(true)}><Heart size={16} /> One more hug</button><button onClick={toggleSong}>{playing ? <Pause size={16} /> : <Music2 size={16} />} {playing ? 'Pause our song' : 'Play our song'}</button><button onClick={() => setReleased(false)}><Sparkles size={16} /> Make a wish</button></div><div className="music-player"><Music2 size={18} /><div><strong>Our birthday songs</strong><span>Choose a song and think of us</span></div><div className="music-tracks">{birthdayConfig.songs.map((song, index) => <label key={song.src}><span>{song.title}</span><audio ref={index === 0 ? audioRef : undefined} controls src={song.src} onPlay={() => setPlaying(index === 0)} onPause={() => { if (index === 0) setPlaying(false) }} /></label>)}</div></div>{playing && <div className="music-note">Our song is playing just for you.</div>}<div className="wish-box"><label htmlFor="wish">Write a wish and send it into the sky</label><div><input id="wish" value={wish} onChange={e => setWish(e.target.value)} placeholder="Something beautiful..." /><button onClick={() => setReleased(true)} aria-label="Release wish"><Sparkles size={16} /></button></div>{released && <p className="released">Your wish is glowing somewhere up there. ✦</p>}</div><button className="restart-button" onClick={restart}><RotateCcw size={14} /> Relive our little story</button></div>{hug && <button className="hug-overlay" onClick={() => setHug(false)} aria-label="Close hug message"><div className="hug-hearts">{Array.from({ length: 12 }, (_, i) => <Heart key={i} fill="currentColor" style={{ transform: `rotate(${i * 30}deg) translateY(-${100 + (i % 3) * 35}px)` }} />)}</div><h2>Sending you<br /><em>the biggest hug.</em></h2><p>Tap anywhere to come back.</p></button>}</section>
-}
-
-export default function Page() {
-  const [scene, setScene] = useState<Scene>('intro'); const [muted, setMuted] = useState(false); const index = scenes.indexOf(scene)
-  const next = () => setScene(scenes[Math.min(index + 1, scenes.length - 1)])
-  const back = () => setScene(scenes[Math.max(index - 1, 0)])
-  return <main className="birthday-app"><Progress scene={scene} onBack={back} onForward={next} muted={muted} setMuted={setMuted} />{scene === 'intro' && <Intro next={next} />}{scene === 'heart' && <HeartScene next={next} />}{scene === 'tree' && <TreeScene next={next} />}{scene === 'letter' && <LetterScene next={next} />}{scene === 'game' && <LoveGame next={next} />}{scene === 'gallery' && <Gallery next={next} />}{scene === 'final' && <FinalScene restart={() => setScene('intro')} />}<footer className="scene-label">{labels[index]} <span>·</span> {String(index + 1).padStart(2, '0')}</footer></main>
+  return <main className="birthday-app"><audio ref={audioRef} src={birthdayConfig.songs[0].src} loop preload="auto" aria-hidden="true" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} /><Progress scene={scene} onBack={back} onForward={next} muted={muted} setMuted={setMuted} />{scene === 'intro' && <Intro next={next} />}{scene === 'heart' && <HeartScene next={next} />}{scene === 'tree' && <TreeScene next={next} />}{scene === 'letter' && <LetterScene next={next} />}{scene === 'game' && <LoveGame next={next} />}{scene === 'gallery' && <Gallery next={next} />}{scene === 'final' && <FinalScene restart={() => setScene('intro')} audioRef={audioRef} playing={playing} toggleSong={toggleSong} />}<footer className="scene-label">{labels[index]} <span>·</span> {String(index + 1).padStart(2, '0')}</footer></main>
 }
